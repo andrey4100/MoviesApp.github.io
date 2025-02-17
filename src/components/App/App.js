@@ -88,7 +88,7 @@ function App() {
       fetchMovies();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, currentPage, searchValue, guestSessionId]);
+  }, [activeTab, currentPage, searchValue]);
 
   // Функция обрабатывает изменения рейтинга
   const handleRatingDeleted = (movieId, newRating = null) => {
