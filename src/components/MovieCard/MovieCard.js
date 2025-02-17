@@ -16,7 +16,7 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
     setLocalRating(null);
   }, [movie]); // Dependency on movie: Reset localRating when movie changes
 
-  const ratingToDisplay = localRating !== null ? localRating : (movie.rating || 0);
+  const ratingToDisplay = localRating !== null ? localRating : movie.rating || 0;
 
   const handleRate = async (value) => {
     try {
@@ -30,7 +30,7 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
         if (onRatingDeleted) {
           onRatingDeleted(movie.id, null);
         }
-        setLocalRating(0); 
+        setLocalRating(0);
       } else {
         // eslint-disable-next-line no-console
         console.log(`Posting rating for movie ID: ${movie.id}, value: ${value}`);
@@ -42,7 +42,7 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Ошибка при оценке фильма:', error);
-      setLocalRating(movie.rating || 0);  
+      setLocalRating(movie.rating || 0);
     }
   };
 
@@ -103,7 +103,7 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
       <div className="movie__card-description">
         {truncateDescription(movie.description, movie.title.length, movie.genres.length)}
       </div>
-      {formattedVoteAverage !== null && (
+      {formattedVoteAverage !== null && formattedVoteAverage !== '0.0' && (
         <div className="rating-circle" style={{ borderColor: ratingColor }}>
           {formattedVoteAverage}
         </div>
