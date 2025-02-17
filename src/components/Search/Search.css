@@ -1,0 +1,23 @@
+
+.search-container{
+    display: flex;
+    justify-content: center;
+}
+
+.search {
+    width: 938px;
+}
+
+@media (max-width: 1010px) {
+
+    .search {
+        max-width: 450px;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .search {
+        max-width: 380px;
+    }
+}

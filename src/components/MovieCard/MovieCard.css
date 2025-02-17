@@ -1,0 +1,142 @@
+.movie__card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 183px 2fr;
+  grid-template-rows: auto auto auto 1fr auto;
+  width: 454px;
+  height: 245px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out;
+}
+
+.movie__card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.movie__card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  grid-row: 1 / span 5;
+  grid-column: 1;
+}
+
+.movie__card-title {
+  font-size: 20px;
+  line-height: 140%;
+  grid-row: 1;
+  grid-column: 2;
+  margin: 0; /* Reset default margin */
+  padding: 5px 35px 5px 10px;
+}
+
+.movie__card-date {
+  font-size: 12px;
+  line-height: 183%;
+  color: #827e7e;
+  grid-row: 2;
+  grid-column: 2;
+  padding: 0 10px;
+  padding-bottom: 10px;
+}
+
+.movie__genres-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  grid-row: 3;
+  grid-column: 2;
+  padding: 0 10px;
+}
+
+.movie__genres-item {
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 12px;
+}
+
+.movie__card-description {
+  font-size: 12px;
+  line-height: 183%;
+  grid-row: 4;
+  grid-column: 2;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.movie__card-rating {
+  grid-row: 5;
+  grid-column: 2;
+  align-self: end;
+  padding: 10px 10px 10px 15px;
+}
+
+.rating-circle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 100%;
+  border: 2px solid;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+.movie__card-rate {
+  grid-row: 7;
+  grid-column: 1 / span 2;
+  justify-self: center;
+  align-self: center;
+  padding: 5px;
+}
+
+
+@media (max-width: 520px) {
+  .movie__card {
+    grid-template-columns: 66px 2fr;
+    grid-template-rows: auto auto auto 1fr auto;
+    width: 387px;
+    height: 245px;
+}
+
+  .movie__card-img {
+    width: 66px;
+    height: 101px;
+    grid-row: 1 / span 3;
+    grid-column: 1;
+    padding: 6px 0px 0px 10px;
+  }
+
+  .movie__card-title {
+    padding: 3px 40px 5px 10px;
+  }
+
+  .movie__card-date {
+    padding: 0 10px;
+  }
+
+
+  .movie__card-description {
+    grid-row: 4;
+    grid-column: 1 / span 2;
+  }
+
+  .movie__card-rating {
+    justify-self: end;
+    align-self: end; 
+    padding: 5px 10px 5px 0;
+  }
+
+  .rating-circle {
+    top: 4px;
+    right: 8px;
+  }
+
+}
