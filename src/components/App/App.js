@@ -67,7 +67,6 @@ function App() {
           const value = searchValue || 'return';
           const data = await movieService.getAllMovies(value, currentPage);
 
-          // Merge ratings from ratedMovies into the fetched movies data
           const moviesWithRatings = data.movies.map((movie) => {
             const ratedMovie = ratedMovies.find((rated) => rated.id === movie.id);
             return ratedMovie ? { ...movie, rating: ratedMovie.rating } : movie;
