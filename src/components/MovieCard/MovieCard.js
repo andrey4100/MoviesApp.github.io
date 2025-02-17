@@ -10,17 +10,17 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
   const imageBaseUrl = 'https://image.tmdb.org/t/p/w185';
   const imageUrl = movie.img ? `${imageBaseUrl}${movie.img}` : placeholderImage;
 
-  const [localRating, setLocalRating] = useState(null); 
+  const [localRating, setLocalRating] = useState(null);
 
   useEffect(() => {
     setLocalRating(null);
-  }, [movie]); 
+  }, [movie]);
 
   const ratingToDisplay = localRating !== null ? localRating : movie.rating || 0;
 
   const handleRate = async (value) => {
     try {
-      setLocalRating(value); 
+      setLocalRating(value);
 
       const movieService = new MovieService();
       if (value === 0 && (movie.rating !== 0 || localRating !== null)) {

@@ -53,7 +53,7 @@ function App() {
       }
     }
     initialize();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Получение списка фильмов, объединение оцененных фильмов
@@ -88,8 +88,8 @@ function App() {
     if (activeTab === '1') {
       fetchMovies();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, currentPage, searchValue, guestSessionId]); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, currentPage, searchValue, guestSessionId]);
 
   // Функция обрабатывает изменения рейтинга
   const handleRatingDeleted = (movieId, newRating = null) => {
@@ -107,32 +107,30 @@ function App() {
     // Обновляем состояние ratedMovies
     setRatedMovies((prevRatedMovies) => {
       if (newRating === null) {
-          return prevRatedMovies.filter(movie => movie.id !== movieId);
+        return prevRatedMovies.filter((movie) => movie.id !== movieId);
       }
       const updatedMovie = movies.find((movie) => movie.id === movieId);
       if (updatedMovie) {
-          const existingMovieIndex = prevRatedMovies.findIndex((movie) => movie.id === movieId);
-          if (existingMovieIndex !== -1) {
-              const updatedRatedMovies = [...prevRatedMovies];
-              updatedRatedMovies[existingMovieIndex] = { ...updatedRatedMovies[existingMovieIndex], rating: newRating };
-              return updatedRatedMovies;
-          } 
-              return [...prevRatedMovies, { ...updatedMovie, rating: newRating }];
-          
+        const existingMovieIndex = prevRatedMovies.findIndex((movie) => movie.id === movieId);
+        if (existingMovieIndex !== -1) {
+          const updatedRatedMovies = [...prevRatedMovies];
+          updatedRatedMovies[existingMovieIndex] = { ...updatedRatedMovies[existingMovieIndex], rating: newRating };
+          return updatedRatedMovies;
+        }
+        return [...prevRatedMovies, { ...updatedMovie, rating: newRating }];
       }
       return prevRatedMovies;
-  });
-};
+    });
+  };
 
-    const searchMovies = (value) => {
-      setSearchValue(value);
-      setCurrentPage(1);
-    };
+  const searchMovies = (value) => {
+    setSearchValue(value);
+    setCurrentPage(1);
+  };
 
-    const onPageChange = (page) => {
-      setCurrentPage(page);
-    };
-
+  const onPageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   const renderContent = () => {
     if (isError) {
