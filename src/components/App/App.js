@@ -64,29 +64,29 @@ function App() {
   // useEffect для получения фильмов с рейтингом при переключении Тab
   useEffect(() => {
     async function fetchRatedMovies() {
-        if (guestSessionId && activeTab === '2') {
-            try {
-                const movieService = new MovieService();
-                const ratedData = await movieService.getRatedMovies(guestSessionId, 1);
-                const ratedMoviesWithRating = ratedData.ratedMovies.map(movie => ({
-                    ...movie,
-                    rating: movie.rating !== undefined ? movie.rating : null
-                }));
-                setRatedMovies(ratedMoviesWithRating);
-            } catch (ratedError) {
-                // eslint-disable-next-line no-console
-                console.error("Ошибка при получении оцененных фильмов:", ratedError);
-                setRatedMovies([]);
-            } finally {
-                setLoading(false);
-            }
+      if (guestSessionId && activeTab === '2') {
+        try {
+          const movieService = new MovieService();
+          const ratedData = await movieService.getRatedMovies(guestSessionId, 1);
+          const ratedMoviesWithRating = ratedData.ratedMovies.map((movie) => ({
+            ...movie,
+            rating: movie.rating !== undefined ? movie.rating : null,
+          }));
+          setRatedMovies(ratedMoviesWithRating);
+        } catch (ratedError) {
+          // eslint-disable-next-line no-console
+          console.error('Ошибка при получении оцененных фильмов:', ratedError);
+          setRatedMovies([]);
+        } finally {
+          setLoading(false);
         }
+      }
     }
 
     if (activeTab === '2') {
-        fetchRatedMovies();
+      fetchRatedMovies();
     }
-}, [guestSessionId, activeTab]);
+  }, [guestSessionId, activeTab]);
 
   const searchMovies = (value) => {
     setSearchValue(value);

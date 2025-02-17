@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // Import useState
 import { Tag, Rate } from 'antd';
 
 import MovieService from '../../services/MovieService';
@@ -10,25 +10,41 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
   const imageBaseUrl = 'https://image.tmdb.org/t/p/w185';
   const imageUrl = movie.img ? `${imageBaseUrl}${movie.img}` : placeholderImage;
 
+  const [localRating, setLocalRating] = useState(null); // Initially null - means "use movie.rating"
+
+  useEffect(() => {
+    setLocalRating(null);
+  }, [movie]); // Dependency on movie: Reset localRating when movie changes
+
+  const ratingToDisplay = localRating !== null ? localRating : (movie.rating || 0);
+
   const handleRate = async (value) => {
-    const movieService = new MovieService();
     try {
-        if (value === 0 && movie.rating !== 0) {
-            await movieService.deleteRatedMovie(guestSessionId, movie.id);
-            if (onRatingDeleted) {
-                onRatingDeleted(movie.id, null);
-            }
-        } else {
-            await movieService.postRatedMovie(guestSessionId, movie.id, value);
-            if (onRatingDeleted) {
-                onRatingDeleted(movie.id, value);
-            }
-        }
-    } catch (error) {
+      setLocalRating(value); // Optimistically update localRating
+
+      const movieService = new MovieService();
+      if (value === 0 && (movie.rating !== 0 || localRating !== null)) {
         // eslint-disable-next-line no-console
-        console.error('Ошибка при оценке фильма:', error);
+        console.log(`Deleting rating for movie ID: ${movie.id}`);
+        await movieService.deleteRatedMovie(guestSessionId, movie.id);
+        if (onRatingDeleted) {
+          onRatingDeleted(movie.id, null);
+        }
+        setLocalRating(0); 
+      } else {
+        // eslint-disable-next-line no-console
+        console.log(`Posting rating for movie ID: ${movie.id}, value: ${value}`);
+        await movieService.postRatedMovie(guestSessionId, movie.id, value);
+        if (onRatingDeleted) {
+          onRatingDeleted(movie.id, value);
+        }
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Ошибка при оценке фильма:', error);
+      setLocalRating(movie.rating || 0);  
     }
-};
+  };
 
   const getRatingColor = (voteAverage) => {
     if (voteAverage <= 3) {
@@ -43,8 +59,8 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
     return '#66E900';
   };
 
-  const formattedVoteAverage = movie.rating != null ? movie.rating.toFixed(1) : null;
-  const ratingColor = getRatingColor(movie.rating || 0);
+  const formattedVoteAverage = ratingToDisplay != null ? ratingToDisplay.toFixed(1) : null;
+  const ratingColor = getRatingColor(ratingToDisplay);
 
   const truncateDescription = (description, titleLength, genreCount) => {
     if (!description) {
@@ -93,7 +109,7 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
         </div>
       )}
       <div className="movie__card-rating">
-        <Rate allowHalf count={10} onChange={handleRate} value={movie.rating || 0} style={{ fontSize: 16 }} />
+        <Rate allowHalf count={10} onChange={handleRate} value={ratingToDisplay} style={{ fontSize: 16 }} />
       </div>
     </div>
   );
