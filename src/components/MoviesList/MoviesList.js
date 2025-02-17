@@ -4,7 +4,7 @@ import MovieCard from '../MovieCard';
 
 import './MoviesList.css';
 
-function MovieList({ movies, genres, guestSessionId, handleRatingDeleted }) {
+function MovieList({ movies, genres, guestSessionId, onRatingDeleted }) {
   if (!movies || movies.length === 0) {
     return <p>Фильмы не найдены.</p>;
   }
@@ -12,10 +12,13 @@ function MovieList({ movies, genres, guestSessionId, handleRatingDeleted }) {
   return (
     <div className="movie__list">
       {movies.map((movie) => (
-        <MovieCard key={movie.id} 
-        movie={movie} genres={genres} 
-        guestSessionId={guestSessionId} 
-        onRatingDeleted={handleRatingDeleted}/>
+        <MovieCard
+          key={movie.id}
+          movie={movie}
+          genres={genres}
+          guestSessionId={guestSessionId}
+          onRatingDeleted={onRatingDeleted}
+        />
       ))}
     </div>
   );

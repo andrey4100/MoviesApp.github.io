@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Tag, Rate } from 'antd';
 
 import MovieService from '../../services/MovieService';
@@ -9,41 +9,20 @@ import placeholderImage from '../../resourses/img/Out_Of_Poster.jpg';
 function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
   const imageBaseUrl = 'https://image.tmdb.org/t/p/w185';
   const imageUrl = movie.img ? `${imageBaseUrl}${movie.img}` : placeholderImage;
-  const [rating, setRating] = useState(movie.rating || 0);
-  const [currentVoteAverage, setCurrentVoteAverage] = useState(movie.rating || 0);
 
-  useEffect(() => {
-    if (rating > 0) {
-      setCurrentVoteAverage(rating);
-    } else {
-      setCurrentVoteAverage(0);
-    }
-  }, [rating]);
 
   const handleRate = async (value) => {
     const movieService = new MovieService();
     try {
-      if (value === 0 && rating !== 0) {
-        // eslint-disable-next-line no-console
-        console.log('Вызываем movieService.deleteRatedMovie(', guestSessionId, ',', movie.id, ')');
+      if (value === 0 && movie.rating !== 0) {
         await movieService.deleteRatedMovie(guestSessionId, movie.id);
-
-        setRating(0);
-        setCurrentVoteAverage(0);
         if (onRatingDeleted) {
-          onRatingDeleted(movie.id);
-        }
-        if (onRatingDeleted) {
-            onRatingDeleted(movie.id, null); 
+          onRatingDeleted(movie.id, null);
         }
       } else {
-        // eslint-disable-next-line no-console
-        console.log('Вызываем movieService.postRatedMovie(', guestSessionId, ',', movie.id, ',', value, ')');
-        setRating(value);
-        setCurrentVoteAverage(value);
         await movieService.postRatedMovie(guestSessionId, movie.id, value);
-         if (onRatingDeleted) {
-            onRatingDeleted(movie.id, value);
+        if (onRatingDeleted) {
+          onRatingDeleted(movie.id, value);
         }
       }
     } catch (error) {
@@ -65,8 +44,8 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
     return '#66E900';
   };
 
-  const formattedVoteAverage = currentVoteAverage !== undefined ? currentVoteAverage.toFixed(1) : null;
-  const ratingColor = getRatingColor(currentVoteAverage);
+  const formattedVoteAverage = movie.rating != null ? movie.rating.toFixed(1) : null;
+  const ratingColor = getRatingColor(movie.rating || 0);
 
   const truncateDescription = (description, titleLength, genreCount) => {
     if (!description) {
@@ -109,14 +88,13 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
       <div className="movie__card-description">
         {truncateDescription(movie.description, movie.title.length, movie.genres.length)}
       </div>
-      {currentVoteAverage > 0 &&
-        formattedVoteAverage !== null && ( // Conditionally render the rating circle
-          <div className="rating-circle" style={{ borderColor: ratingColor }}>
-            {formattedVoteAverage}
-          </div>
-        )}
+      {formattedVoteAverage !== null && (
+        <div className="rating-circle" style={{ borderColor: ratingColor }}>
+          {formattedVoteAverage}
+        </div>
+      )}
       <div className="movie__card-rating">
-        <Rate allowHalf count={10} onChange={handleRate} value={rating} style={{ fontSize: 16 }} />
+        <Rate allowHalf count={10} onChange={handleRate} value={movie.rating || 0} style={{ fontSize: 16 }} />
       </div>
     </div>
   );
