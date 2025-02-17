@@ -68,7 +68,11 @@ function App() {
             try {
                 const movieService = new MovieService();
                 const ratedData = await movieService.getRatedMovies(guestSessionId, 1);
-                setRatedMovies(ratedData.ratedMovies);
+                const ratedMoviesWithRating = ratedData.ratedMovies.map(movie => ({
+                    ...movie,
+                    rating: movie.rating !== undefined ? movie.rating : null
+                }));
+                setRatedMovies(ratedMoviesWithRating);
             } catch (ratedError) {
                 // eslint-disable-next-line no-console
                 console.error("Ошибка при получении оцененных фильмов:", ratedError);
@@ -164,12 +168,8 @@ function App() {
             <>
               {renderContent()}
               {!loading && !isError && movies.length > 0 && (
-              <MoviePagination
-                  currentPage={currentPage}
-                  totalResults={totalResults}
-                  onPageChange={onPageChange}
-              />
-            )}
+                <MoviePagination currentPage={currentPage} totalResults={totalResults} onPageChange={onPageChange} />
+              )}
             </>
           )}
         </>

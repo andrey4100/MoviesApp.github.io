@@ -10,26 +10,25 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
   const imageBaseUrl = 'https://image.tmdb.org/t/p/w185';
   const imageUrl = movie.img ? `${imageBaseUrl}${movie.img}` : placeholderImage;
 
-
   const handleRate = async (value) => {
     const movieService = new MovieService();
     try {
-      if (value === 0 && movie.rating !== 0) {
-        await movieService.deleteRatedMovie(guestSessionId, movie.id);
-        if (onRatingDeleted) {
-          onRatingDeleted(movie.id, null);
+        if (value === 0 && movie.rating !== 0) {
+            await movieService.deleteRatedMovie(guestSessionId, movie.id);
+            if (onRatingDeleted) {
+                onRatingDeleted(movie.id, null);
+            }
+        } else {
+            await movieService.postRatedMovie(guestSessionId, movie.id, value);
+            if (onRatingDeleted) {
+                onRatingDeleted(movie.id, value);
+            }
         }
-      } else {
-        await movieService.postRatedMovie(guestSessionId, movie.id, value);
-        if (onRatingDeleted) {
-          onRatingDeleted(movie.id, value);
-        }
-      }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Ошибка при оценке фильма:', error);
+        // eslint-disable-next-line no-console
+        console.error('Ошибка при оценке фильма:', error);
     }
-  };
+};
 
   const getRatingColor = (voteAverage) => {
     if (voteAverage <= 3) {
