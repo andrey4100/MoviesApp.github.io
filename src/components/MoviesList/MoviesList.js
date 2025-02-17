@@ -1,8 +1,8 @@
-import React from "react";  
+import React from 'react';
 
-import MovieCard from "../MovieCard"
+import MovieCard from '../MovieCard';
 
-import "./MoviesList.css"
+import './MoviesList.css';
 
 function MovieList({ movies, genres, guestSessionId }) {
   if (!movies || movies.length === 0) {
@@ -11,16 +11,11 @@ function MovieList({ movies, genres, guestSessionId }) {
 
   return (
     <div className="movie__list">
-      {movies.map(movie => (
-        <MovieCard
-          key={movie.id}
-          movie={movie}
-          genres={genres}
-          guestSessionId={guestSessionId}
-        />
+      {movies.map((movie) => (
+        <MovieCard key={movie.id} movie={movie} genres={genres} guestSessionId={guestSessionId} />
       ))}
     </div>
   );
 }
 
-export default MovieList
+export default MovieList;

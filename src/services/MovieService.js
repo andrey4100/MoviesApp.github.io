@@ -2,9 +2,9 @@ import { format, parseISO } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 
 class MovieService {
-  apiBase = "https://api.themoviedb.org/3"; // Базовый URL API
+  apiBase = 'https://api.themoviedb.org/3'; // Базовый URL API
 
-  apiKey = "e2e43d7fe98688bb25fcaa78ca64ec4f"; // Сгенерированный ключ API
+  apiKey = 'e2e43d7fe98688bb25fcaa78ca64ec4f'; // Сгенерированный ключ API
 
   // Универсальный метод для запроса данных
   // eslint-disable-next-line class-methods-use-this
@@ -17,7 +17,7 @@ class MovieService {
       return await res.json();
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("Ошибка при выполнении запроса:", err);
+      console.error('Ошибка при выполнении запроса:', err);
       throw err;
     }
   };
@@ -35,10 +35,8 @@ class MovieService {
 
   // Метод для получения списка жанров
   getGenres = async () => {
-    const res = await this.getResource(
-      `${this.apiBase}/genre/movie/list?api_key=${this.apiKey}&language=en-US`
-    );
-    
+    const res = await this.getResource(`${this.apiBase}/genre/movie/list?api_key=${this.apiKey}&language=en-US`);
+
     const genres = res.genres.reduce((acc, genre) => {
       acc[genre.id] = genre.name;
       return acc;
@@ -47,36 +45,36 @@ class MovieService {
     return genres;
   };
 
-    // Создание гостевой сессии 
-    createGuestSession = async () => {
-      const res = await this.getResource(
-        `${this.apiBase}/authentication/guest_session/new?api_key=${this.apiKey}`
-      );
-      return res.guest_session_id;
-    };
-    
-    // Метод для получения оцененных фильмов
-    getRatedMovies = async (guestSessionId, page = 1) => {
-      try {
-        const res = await this.getResource(
-          `${this.apiBase}/guest_session/${guestSessionId}/rated/movies?api_key=${this.apiKey}&language=en-US&page=${page}`
-        );
-        
-        const ratedMovies = res.results ? res.results.map(movie => ({
-          ...this.transformMovie(movie),
-          rating: movie.rating 
-        })) : [];
-        const totalratedMovies = res.total_results;
-        const currPage = res.page;
-    
-        return { ratedMovies, totalratedMovies, currPage };
-      } catch (error) {
-        return { ratedMovies: [], totalratedMovies: 0, currPage: 1 };
-      }
-    };
+  // Создание гостевой сессии
+  createGuestSession = async () => {
+    const res = await this.getResource(`${this.apiBase}/authentication/guest_session/new?api_key=${this.apiKey}`);
+    return res.guest_session_id;
+  };
 
-    // Метод для размещения рейтинга
-    postRatedMovie = async (guestSessionId, movieId, rating) => { 
+  // Метод для получения оцененных фильмов
+  getRatedMovies = async (guestSessionId, page = 1) => {
+    try {
+      const res = await this.getResource(
+        `${this.apiBase}/guest_session/${guestSessionId}/rated/movies?api_key=${this.apiKey}&language=en-US&page=${page}`
+      );
+
+      const ratedMovies = res.results
+        ? res.results.map((movie) => ({
+            ...this.transformMovie(movie),
+            rating: movie.rating,
+          }))
+        : [];
+      const totalratedMovies = res.total_results;
+      const currPage = res.page;
+
+      return { ratedMovies, totalratedMovies, currPage };
+    } catch (error) {
+      return { ratedMovies: [], totalratedMovies: 0, currPage: 1 };
+    }
+  };
+
+  // Метод для размещения рейтинга
+  postRatedMovie = async (guestSessionId, movieId, rating) => {
     try {
       const body = {
         value: rating,
@@ -85,9 +83,9 @@ class MovieService {
       const res = await fetch(
         `${this.apiBase}/movie/${movieId}/rating?api_key=${this.apiKey}&guest_session_id=${guestSessionId}`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json;charset=utf-8",
+            'Content-Type': 'application/json;charset=utf-8',
           },
           body: JSON.stringify(body),
         }
@@ -95,19 +93,19 @@ class MovieService {
       return await res.json();
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("Ошибка при отправке рейтинга:", error);
+      console.error('Ошибка при отправке рейтинга:', error);
       throw error;
     }
   };
 
   // Метод для удаления рейтинга
-  deleteRatedMovie = async (guestSessionId, movieId) => { 
+  deleteRatedMovie = async (guestSessionId, movieId) => {
     try {
       const res = await fetch(
         `${this.apiBase}/movie/${movieId}/rating?api_key=${this.apiKey}&guest_session_id=${guestSessionId}`,
         {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json;charset=utf-8" },
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json;charset=utf-8' },
         }
       );
 
@@ -118,16 +116,15 @@ class MovieService {
       return res.status;
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("Ошибка при удалении рейтинга:", error);
+      console.error('Ошибка при удалении рейтинга:', error);
       throw error;
     }
   };
 
-
   // Метод для преобразования даты в нужынй формат
   // eslint-disable-next-line class-methods-use-this
   transformMovie = (movie) => {
-    const formatDate = (movieDate) => format(parseISO(movieDate), "MMMM d, y", { locale: enUS });
+    const formatDate = (movieDate) => format(parseISO(movieDate), 'MMMM d, y', { locale: enUS });
     const formattedDate = movie.release_date ? formatDate(movie.release_date) : null;
 
     return {

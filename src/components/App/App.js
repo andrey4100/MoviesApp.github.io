@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Spin, Tabs } from "antd";
-import { Offline, Online } from "react-detect-offline"
+import { Alert, Spin, Tabs } from 'antd';
+import { Offline, Online } from 'react-detect-offline';
 
 import MovieService from '../../services/MovieService';
 import Search from '../Search';
-import MovieList from "../MoviesList"
+import MovieList from '../MoviesList';
 import MoviePagination from '../MoviePagination';
-import MovieRate from "../MovieRate";
+import MovieRate from '../MovieRate';
 import GenresContext from '../GenresContext';
 
 import './App.css';
@@ -40,7 +40,7 @@ function App() {
           setGuestSessionId(guestSession);
         } catch (guestSessionError) {
           // eslint-disable-next-line no-console
-          console.error("Ошибка при создании гостевой сессии:", guestSessionError);
+          console.error('Ошибка при создании гостевой сессии:', guestSessionError);
           setError(true);
         }
 
@@ -52,7 +52,7 @@ function App() {
         setLoading(false);
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error("Ошибка при загрузке данных:", error);
+        console.error('Ошибка при загрузке данных:', error);
         setLoading(false);
         setError(true);
       }
@@ -67,14 +67,13 @@ function App() {
       if (guestSessionId && activeTab === '2') {
         try {
           const movieService = new MovieService();
-          const ratedData = await movieService.getRatedMovies(guestSessionId, 1);  // GET-запрос для получения списка оцененных фильмов
+          const ratedData = await movieService.getRatedMovies(guestSessionId, 1); // GET-запрос для получения списка оцененных фильмов
           setRatedMovies(ratedData.ratedMovies);
         } catch (ratedError) {
           // eslint-disable-next-line no-console
-          console.error("Ошибка при получении оцененных фильмов:", ratedError);
+          console.error('Ошибка при получении оцененных фильмов:', ratedError);
           setRatedMovies([]);
-        }
-        finally{
+        } finally {
           setLoading(false);
         }
       }
@@ -93,17 +92,14 @@ function App() {
   const onPageChange = (page) => {
     setCurrentPage(page);
   };
-  
+
   const handleRatingDeleted = (movieId, newRating = null) => {
     setRatedMovies((prevRatedMovies) => prevRatedMovies.filter((movie) => movie.id !== movieId));
 
-    setMovies(prevMovies =>
-        prevMovies.map(movie =>
-            movie.id === movieId ? { ...movie, rating: newRating } : movie
-        )
+    setMovies((prevMovies) =>
+      prevMovies.map((movie) => (movie.id === movieId ? { ...movie, rating: newRating } : movie))
     );
-};
-
+  };
 
   const renderContent = () => {
     if (isError) {
@@ -118,7 +114,14 @@ function App() {
       return <p>Фильмы не найдены.</p>;
     }
 
-    return <MovieList movies={movies} genres={genres} guestSessionId={guestSessionId} onRatingDeleted={handleRatingDeleted}/>;
+    return (
+      <MovieList
+        movies={movies}
+        genres={genres}
+        guestSessionId={guestSessionId}
+        onRatingDeleted={handleRatingDeleted}
+      />
+    );
   };
 
   const items = [
@@ -137,11 +140,7 @@ function App() {
             <>
               {renderContent()}
               {movies.length > 0 && (
-              <MoviePagination
-              currentPage={currentPage}
-              totalResults={totalResults}
-              onPageChange={onPageChange}
-              />
+                <MoviePagination currentPage={currentPage} totalResults={totalResults} onPageChange={onPageChange} />
               )}
             </>
           )}
@@ -153,7 +152,11 @@ function App() {
       label: 'Rated',
       children: (
         <>
-          {guestSessionId && <div className='movieRate-disabled'><MovieRate guestSessionId={guestSessionId} ratedMovies={ratedMovies}/></div>}
+          {guestSessionId && (
+            <div className="movieRate-disabled">
+              <MovieRate guestSessionId={guestSessionId} ratedMovies={ratedMovies} />
+            </div>
+          )}
         </>
       ),
     },
@@ -178,4 +181,3 @@ function App() {
 }
 
 export default App;
-

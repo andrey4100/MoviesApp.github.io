@@ -1,7 +1,7 @@
 import React from 'react';
-import { Pagination } from "antd";
+import { Pagination } from 'antd';
 
-import "./MoviePagination.css"
+import './MoviePagination.css';
 
 function MoviePagination({ currentPage, totalResults, onPageChange }) {
   return (
