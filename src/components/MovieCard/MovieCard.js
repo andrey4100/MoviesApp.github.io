@@ -33,12 +33,18 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
         if (onRatingDeleted) {
           onRatingDeleted(movie.id);
         }
+        if (onRatingDeleted) {
+            onRatingDeleted(movie.id, null); 
+        }
       } else {
         // eslint-disable-next-line no-console
         console.log('Вызываем movieService.postRatedMovie(', guestSessionId, ',', movie.id, ',', value, ')');
         setRating(value);
         setCurrentVoteAverage(value);
         await movieService.postRatedMovie(guestSessionId, movie.id, value);
+         if (onRatingDeleted) {
+            onRatingDeleted(movie.id, value);
+        }
       }
     } catch (error) {
       // eslint-disable-next-line no-console

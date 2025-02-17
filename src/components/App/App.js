@@ -96,10 +96,35 @@ function App() {
   const handleRatingDeleted = (movieId, newRating = null) => {
     setRatedMovies((prevRatedMovies) => prevRatedMovies.filter((movie) => movie.id !== movieId));
 
-    setMovies((prevMovies) =>
-      prevMovies.map((movie) => (movie.id === movieId ? { ...movie, rating: newRating } : movie))
-    );
-  };
+    setMovies(prevMovies => prevMovies.map(movie => {
+            if (movie.id === movieId) {
+                return { ...movie, rating: newRating };
+            }
+            return movie;
+        }));
+
+    // Обновляем состояние ratedMovies
+    setRatedMovies(prevRatedMovies => {
+        // Если newRating не null, значит, пользователь установил рейтинг, а не удалил его
+        if (newRating !== null) {
+            // Проверяем, есть ли уже фильм с таким id в ratedMovies
+            const existingMovieIndex = prevRatedMovies.findIndex(movie => movie.id === movieId);
+            if (existingMovieIndex !== -1) {
+                // Если фильм уже есть, обновляем его рейтинг
+                const updatedRatedMovies = [...prevRatedMovies];
+                updatedRatedMovies[existingMovieIndex] = { ...updatedRatedMovies[existingMovieIndex], rating: newRating };
+                return updatedRatedMovies;
+            } 
+                // Если фильма нет, добавляем его в список
+                const updatedMovie = movies.find(movie => movie.id === movieId); // Получаем полную информацию о фильме из movies
+                if (updatedMovie) {
+                    return [...prevRatedMovies, { ...updatedMovie, rating: newRating }];
+                }
+            
+        }
+        return prevRatedMovies;
+    });
+};
 
   const renderContent = () => {
     if (isError) {
