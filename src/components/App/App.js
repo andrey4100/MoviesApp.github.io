@@ -12,6 +12,7 @@ import GenresContext from '../GenresContext';
 import './App.css';
 
 function App() {
+  
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [genres, setGenres] = useState({});
@@ -22,8 +23,10 @@ function App() {
   const [guestSessionId, setGuestSessionId] = useState(null);
   const [ratedMovies, setRatedMovies] = useState([]);
   const [activeTab, setActiveTab] = useState('1');
+  const [ratedCurrentPage, setRatedCurrentPage] = useState(1);
 
   const movieService = new MovieService();
+  const moviesPerPage = 20;
 
   // Инициализация сессии, получение жанров
   useEffect(() => {
@@ -131,6 +134,10 @@ function App() {
     setCurrentPage(page);
   };
 
+  const onRatedPageChange = (page) => {
+    setRatedCurrentPage(page);
+};
+
   const renderContent = () => {
     if (isError) {
       return (
@@ -154,6 +161,13 @@ function App() {
     );
   };
 
+
+  const getPaginatedRatedMovies = () => {
+    const startIndex = (ratedCurrentPage - 1) * moviesPerPage;
+    const endIndex = startIndex + moviesPerPage;
+    return ratedMovies.slice(startIndex, endIndex);
+};
+
   const items = [
     {
       key: '1',
@@ -170,7 +184,11 @@ function App() {
             <>
               {renderContent()}
               {!loading && !isError && movies.length > 0 && (
-                <MoviePagination currentPage={currentPage} totalResults={totalResults} onPageChange={onPageChange} />
+                <MoviePagination 
+                  currentPage={currentPage} 
+                  totalResults={totalResults} 
+                  onPageChange={onPageChange} 
+                />
               )}
             </>
           )}
@@ -183,8 +201,17 @@ function App() {
       children: (
         <>
           {guestSessionId && (
-            <div className="movieRate-disabled">
-              <MovieRate guestSessionId={guestSessionId} ratedMovies={ratedMovies} />
+            <div>
+              <div className="movieRate-disabled">
+                <MovieRate guestSessionId={guestSessionId} ratedMovies={getPaginatedRatedMovies()} />
+              </div>
+                {ratedMovies.length > moviesPerPage && (
+                <MoviePagination
+                  currentPage={ratedCurrentPage}
+                  totalResults={ratedMovies.length}
+                  onPageChange={onRatedPageChange}
+                />
+                )}
             </div>
           )}
         </>
