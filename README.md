@@ -1,6 +1,6 @@
 # Movies App
 
-Приложение на Vercel: https://todo-github-io-six.vercel.app/
+Приложение на Vercel: https://movies-app-github-io.vercel.app/
 
 
 PS
