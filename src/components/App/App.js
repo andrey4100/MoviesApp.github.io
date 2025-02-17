@@ -23,80 +23,75 @@ function App() {
   const [ratedMovies, setRatedMovies] = useState([]);
   const [activeTab, setActiveTab] = useState('1');
 
-  // Загрузка основных данных (жанров, списка фильмов) при монтировании компонента
-  useEffect(() => {
-    const movieService = new MovieService();
+  const movieService = new MovieService();
 
-    async function fetchData() {
+  // Инициализация сессии, получение жанров
+  useEffect(() => {
+    async function initialize() {
       try {
         setLoading(true);
         setError(false);
 
-        const genresData = await movieService.getGenres(); // GET-запрос для получения списка жанров
+        const genresData = await movieService.getGenres();
         setGenres(genresData);
 
         try {
-          const guestSession = await movieService.createGuestSession(); // GET-запрос для создания гостевой сессии
+          const guestSession = await movieService.createGuestSession();
           setGuestSessionId(guestSession);
         } catch (guestSessionError) {
           // eslint-disable-next-line no-console
           console.error('Ошибка при создании гостевой сессии:', guestSessionError);
           setError(true);
         }
-
-        const value = searchValue || 'return';
-        const data = await movieService.getAllMovies(value, currentPage); // GET-запрос для получения списка фильмов
-        setMovies(data.movies);
-        setTotalResults(data.totalMovies);
-
-        setLoading(false);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Ошибка при загрузке данных:', error);
         setLoading(false);
         setError(true);
+      } finally {
+        setLoading(false);
       }
     }
+    initialize();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    fetchData();
-  }, [searchValue, currentPage]);
-
-  // useEffect для получения фильмов с рейтингом при переключении Тab
+  // Получение списка фильмов, объединение оцененных фильмов
   useEffect(() => {
-    async function fetchRatedMovies() {
-      if (guestSessionId && activeTab === '2') {
-        try {
-          const movieService = new MovieService();
-          const ratedData = await movieService.getRatedMovies(guestSessionId, 1);
-          const ratedMoviesWithRating = ratedData.ratedMovies.map((movie) => ({
-            ...movie,
-            rating: movie.rating !== undefined ? movie.rating : null,
-          }));
-          setRatedMovies(ratedMoviesWithRating);
-        } catch (ratedError) {
-          // eslint-disable-next-line no-console
-          console.error('Ошибка при получении оцененных фильмов:', ratedError);
-          setRatedMovies([]);
-        } finally {
-          setLoading(false);
+    async function fetchMovies() {
+      try {
+        setLoading(true);
+        setError(false);
+
+        if (activeTab === '1') {
+          const value = searchValue || 'return';
+          const data = await movieService.getAllMovies(value, currentPage);
+
+          // Merge ratings from ratedMovies into the fetched movies data
+          const moviesWithRatings = data.movies.map((movie) => {
+            const ratedMovie = ratedMovies.find((rated) => rated.id === movie.id);
+            return ratedMovie ? { ...movie, rating: ratedMovie.rating } : movie;
+          });
+
+          setMovies(moviesWithRatings);
+          setTotalResults(data.totalMovies);
         }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Ошибка при загрузке данных:', error);
+        setError(true);
+      } finally {
+        setLoading(false);
       }
     }
 
-    if (activeTab === '2') {
-      fetchRatedMovies();
+    if (activeTab === '1') {
+      fetchMovies();
     }
-  }, [guestSessionId, activeTab]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, currentPage, searchValue, guestSessionId]); 
 
-  const searchMovies = (value) => {
-    setSearchValue(value);
-    setCurrentPage(1);
-  };
-
-  const onPageChange = (page) => {
-    setCurrentPage(page);
-  };
-
+  // Функция обрабатывает изменения рейтинга
   const handleRatingDeleted = (movieId, newRating = null) => {
     setRatedMovies((prevRatedMovies) => prevRatedMovies.filter((movie) => movie.id !== movieId));
 
@@ -111,23 +106,33 @@ function App() {
 
     // Обновляем состояние ratedMovies
     setRatedMovies((prevRatedMovies) => {
-      if (newRating !== null) {
-        const existingMovieIndex = prevRatedMovies.findIndex((movie) => movie.id === movieId);
-        if (existingMovieIndex !== -1) {
-          // Если фильм уже есть, обновляем его рейтинг
-          const updatedRatedMovies = [...prevRatedMovies];
-          updatedRatedMovies[existingMovieIndex] = { ...updatedRatedMovies[existingMovieIndex], rating: newRating };
-          return updatedRatedMovies;
-        }
-        // Если фильма нет, добавляем его в список
-        const updatedMovie = movies.find((movie) => movie.id === movieId); // Получаем полную информацию о фильме из movies
-        if (updatedMovie) {
-          return [...prevRatedMovies, { ...updatedMovie, rating: newRating }];
-        }
+      if (newRating === null) {
+          return prevRatedMovies.filter(movie => movie.id !== movieId);
+      }
+      const updatedMovie = movies.find((movie) => movie.id === movieId);
+      if (updatedMovie) {
+          const existingMovieIndex = prevRatedMovies.findIndex((movie) => movie.id === movieId);
+          if (existingMovieIndex !== -1) {
+              const updatedRatedMovies = [...prevRatedMovies];
+              updatedRatedMovies[existingMovieIndex] = { ...updatedRatedMovies[existingMovieIndex], rating: newRating };
+              return updatedRatedMovies;
+          } 
+              return [...prevRatedMovies, { ...updatedMovie, rating: newRating }];
+          
       }
       return prevRatedMovies;
-    });
-  };
+  });
+};
+
+    const searchMovies = (value) => {
+      setSearchValue(value);
+      setCurrentPage(1);
+    };
+
+    const onPageChange = (page) => {
+      setCurrentPage(page);
+    };
+
 
   const renderContent = () => {
     if (isError) {
