@@ -182,7 +182,10 @@ function App() {
             <>
               {renderContent()}
               {!loading && !isError && movies.length > 0 && (
-                <MoviePagination currentPage={currentPage} totalResults={totalResults} onPageChange={onPageChange} />
+                <MoviePagination 
+                  currentPage={currentPage} 
+                  totalResults={totalResults} 
+                  onPageChange={onPageChange} />
               )}
             </>
           )}
@@ -197,7 +200,7 @@ function App() {
           {guestSessionId && (
             <div>
               <div className="movieRate-disabled">
-                <MovieRate guestSessionId={guestSessionId} ratedMovies={getPaginatedRatedMovies()} />
+                <MovieRate guestSessionId={guestSessionId} ratedMovies={getPaginatedRatedMovies()} ratedCurrentPage={ratedCurrentPage} onRatedPageChange={onRatedPageChange}/>
               </div>
               {ratedMovies.length > moviesPerPage && (
                 <MoviePagination
