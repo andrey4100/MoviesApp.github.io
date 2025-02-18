@@ -12,7 +12,6 @@ import GenresContext from '../GenresContext';
 import './App.css';
 
 function App() {
-  
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [genres, setGenres] = useState({});
@@ -136,7 +135,7 @@ function App() {
 
   const onRatedPageChange = (page) => {
     setRatedCurrentPage(page);
-};
+  };
 
   const renderContent = () => {
     if (isError) {
@@ -161,12 +160,11 @@ function App() {
     );
   };
 
-
   const getPaginatedRatedMovies = () => {
     const startIndex = (ratedCurrentPage - 1) * moviesPerPage;
     const endIndex = startIndex + moviesPerPage;
     return ratedMovies.slice(startIndex, endIndex);
-};
+  };
 
   const items = [
     {
@@ -184,11 +182,7 @@ function App() {
             <>
               {renderContent()}
               {!loading && !isError && movies.length > 0 && (
-                <MoviePagination 
-                  currentPage={currentPage} 
-                  totalResults={totalResults} 
-                  onPageChange={onPageChange} 
-                />
+                <MoviePagination currentPage={currentPage} totalResults={totalResults} onPageChange={onPageChange} />
               )}
             </>
           )}
@@ -205,13 +199,13 @@ function App() {
               <div className="movieRate-disabled">
                 <MovieRate guestSessionId={guestSessionId} ratedMovies={getPaginatedRatedMovies()} />
               </div>
-                {ratedMovies.length > moviesPerPage && (
+              {ratedMovies.length > moviesPerPage && (
                 <MoviePagination
                   currentPage={ratedCurrentPage}
                   totalResults={ratedMovies.length}
                   onPageChange={onRatedPageChange}
                 />
-                )}
+              )}
             </div>
           )}
         </>
