@@ -1,3 +1,4 @@
+/* eslint-disable no-lonely-if */
 import React, { useState, useEffect } from 'react';
 import { Alert, Spin, Tabs } from 'antd';
 import { Offline, Online } from 'react-detect-offline';
@@ -15,14 +16,18 @@ function App() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [genres, setGenres] = useState({});
-  const [isError, setError] = useState(false);
+  const [isErrorTab1, setIsErrorTab1] = useState(false);
+  const [isErrorTab2, setIsErrorTab2] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [guestSessionId, setGuestSessionId] = useState(null);
-  const [ratedMovies, setRatedMovies] = useState([]);
   const [activeTab, setActiveTab] = useState('1');
   const [ratedCurrentPage, setRatedCurrentPage] = useState(1);
+  const [ratedMovies, setRatedMovies] = useState([]); // Состояние для хранения оцененных фильмов, полученных с сервера
+  const [totalRatedMovies, setTotalRatedMovies] = useState(0); // Состояние для хранения общего количества оцененных фильмов
+  const [hasEverRatedMovies, setHasEverRatedMovies] = useState(false);
+
 
   const movieService = new MovieService();
   const moviesPerPage = 20;
@@ -32,7 +37,7 @@ function App() {
     async function initialize() {
       try {
         setLoading(true);
-        setError(false);
+        setIsErrorTab1(false);
 
         const genresData = await movieService.getGenres();
         setGenres(genresData);
@@ -43,13 +48,13 @@ function App() {
         } catch (guestSessionError) {
           // eslint-disable-next-line no-console
           console.error('Ошибка при создании гостевой сессии:', guestSessionError);
-          setError(true);
+          setIsErrorTab1(true);
         }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Ошибка при загрузке данных:', error);
         setLoading(false);
-        setError(true);
+        setIsErrorTab1(true);
       } finally {
         setLoading(false);
       }
@@ -58,42 +63,94 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+
+  
   // Получение списка фильмов, объединение оцененных фильмов
   useEffect(() => {
     async function fetchMovies() {
       try {
         setLoading(true);
-        setError(false);
+        setIsErrorTab1(false);
+        let data;
 
         if (activeTab === '1') {
-          const value = searchValue || 'return';
-          const data = await movieService.getAllMovies(value, currentPage);
+          const value = searchValue.trim(); 
 
+          if (!value) {
+            data = await movieService.getPopularMovies(currentPage); 
+          } else {
+            data = await movieService.getAllMovies(value, currentPage); 
+          }
+  
           const moviesWithRatings = data.movies.map((movie) => {
             const ratedMovie = ratedMovies.find((rated) => rated.id === movie.id);
             return ratedMovie ? { ...movie, rating: ratedMovie.rating } : movie;
           });
-
+  
           setMovies(moviesWithRatings);
           setTotalResults(data.totalMovies);
         }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Ошибка при загрузке данных:', error);
-        setError(true);
+        setIsErrorTab1(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+  
+    fetchMovies();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ searchValue, currentPage ]);
+
+
+  //  Получение оцененных фильмов с сервера при переключении на второй таб
+  useEffect(() => {
+    async function fetchRatedMovies() {
+      if (!guestSessionId || activeTab !== '2') {
+        setRatedMovies([]); // Clear movies if not active or no guest session
+        setTotalRatedMovies(0);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setIsErrorTab2(false);
+
+        const data = await movieService.getRatedMovies(guestSessionId);
+        setRatedMovies(data.ratedMovies);
+        setTotalRatedMovies(data.totalratedMovies);
+        // eslint-disable-next-line no-console
+        console.log('Оцененные фильмы, полученные с сервера:', data.ratedMovies);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Ошибка при загрузке оцененных фильмов:', error);
+        setIsErrorTab2(true);
+        setRatedMovies([]);
+        setTotalRatedMovies(0);
       } finally {
         setLoading(false);
       }
     }
 
-    if (activeTab === '1') {
-      fetchMovies();
-    }
+    fetchRatedMovies();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, currentPage, searchValue]);
+  }, [activeTab, guestSessionId]);
+
 
   // Функция обрабатывает изменения рейтинга
   const handleRatingDeleted = (movieId, newRating = null) => {
+    
+      if (typeof newRating === 'number') {
+        if (!hasEverRatedMovies) {
+          setHasEverRatedMovies(true);
+        }
+      } else {
+        if (ratedMovies.length <= 1) {
+          setHasEverRatedMovies(false); 
+        }
+      }
+
     setRatedMovies((prevRatedMovies) => prevRatedMovies.filter((movie) => movie.id !== movieId));
 
     setMovies((prevMovies) =>
@@ -137,8 +194,15 @@ function App() {
     setRatedCurrentPage(page);
   };
 
+
+  const getPaginatedRatedMovies = () => {
+    const startIndex = (ratedCurrentPage - 1) * moviesPerPage;
+    const endIndex = startIndex + moviesPerPage;
+    return ratedMovies.slice(startIndex, endIndex);
+  };
+
   const renderContent = () => {
-    if (isError) {
+    if (isErrorTab1) {
       return (
         <div className="movie__list-alert">
           <Alert message="Error" description="Oopse! Something went wrong. Wait, we'll fix it." type="error" showIcon />
@@ -160,12 +224,6 @@ function App() {
     );
   };
 
-  const getPaginatedRatedMovies = () => {
-    const startIndex = (ratedCurrentPage - 1) * moviesPerPage;
-    const endIndex = startIndex + moviesPerPage;
-    return ratedMovies.slice(startIndex, endIndex);
-  };
-
   const items = [
     {
       key: '1',
@@ -181,11 +239,12 @@ function App() {
           ) : (
             <>
               {renderContent()}
-              {!loading && !isError && movies.length > 0 && (
+              {!loading && !isErrorTab1 && movies.length > 0 && (
                 <MoviePagination 
                   currentPage={currentPage} 
                   totalResults={totalResults} 
-                  onPageChange={onPageChange} />
+                  onPageChange={onPageChange} 
+                />
               )}
             </>
           )}
@@ -197,24 +256,55 @@ function App() {
       label: 'Rated',
       children: (
         <>
-          {guestSessionId && (
-            <div>
-              <div className="movieRate-disabled">
-                <MovieRate guestSessionId={guestSessionId} ratedMovies={getPaginatedRatedMovies()} ratedCurrentPage={ratedCurrentPage} onRatedPageChange={onRatedPageChange}/>
-              </div>
-              {ratedMovies.length > moviesPerPage && (
-                <MoviePagination
-                  currentPage={ratedCurrentPage}
-                  totalResults={ratedMovies.length}
-                  onPageChange={onRatedPageChange}
-                />
-              )}
+          {loading ? (
+            <div className="loading-container">
+              <Spin size="large" />
+              <div className="loading-text">Loading...</div>
             </div>
-          )}
+          ) : (
+            () => {
+              if (hasEverRatedMovies === false) {
+                return (
+                  <div className="no-rated-movies">
+                    <p>Вы еще не оценили ни одного фильма.</p>
+                  </div>
+                );
+              }
+              if (isErrorTab2) {
+                return (
+                  <div className="movie__list-alert">
+                    <Alert message="Error" description="Oopse! Something went wrong. Wait, we'll fix it." type="error" showIcon />
+                  </div>
+                );
+              }
+              if (!guestSessionId) {
+                return null;
+              }
+              return (
+                <div>
+                  <div className="movieRate-disabled">
+                    <MovieRate
+                      guestSessionId={guestSessionId}
+                      ratedMovies={getPaginatedRatedMovies()}
+                      ratedCurrentPage={ratedCurrentPage}
+                      onRatedPageChange={onRatedPageChange}
+                    />
+                  </div>
+                  {ratedMovies.length > moviesPerPage && (
+                    <MoviePagination
+                      currentPage={ratedCurrentPage}
+                      totalResults={totalRatedMovies}
+                      onPageChange={onRatedPageChange}
+                    />
+                  )}
+                </div>
+              );
+            }
+          )()}
         </>
       ),
-    },
-  ];
+    }
+  ]
 
   return (
     <GenresContext.Provider value={genres}>

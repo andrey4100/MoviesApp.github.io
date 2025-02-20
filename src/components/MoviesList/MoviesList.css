@@ -18,3 +18,9 @@
       align-items: center;
   }
 }
+
+@media (max-width: 450px) {
+  .movie__list {
+    padding: 20px  5px 20px 5px;
+  }
+}

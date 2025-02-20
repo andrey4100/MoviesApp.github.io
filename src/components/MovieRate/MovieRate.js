@@ -11,31 +11,24 @@ function MovieRate({ guestSessionId, ratedMovies, onRatingDeleted, onRatedPageCh
     // Логика перемещения на предыдущую страницу
     if (ratedMovies.length === 0) {
       if (ratedCurrentPage > 1) {
-        onRatedPageChange(ratedCurrentPage - 1); 
+        onRatedPageChange(ratedCurrentPage - 1);
       } else {
-        onRatedPageChange(1); 
+        onRatedPageChange(1);
       }
     }
   }, [ratedMovies.length, ratedCurrentPage, onRatedPageChange]);
 
   const renderContent = () => (
-    <MovieList 
-      movies={ratedMovies} 
-      genres={genres} 
-      guestSessionId={guestSessionId} 
-      onRatingDeleted={onRatingDeleted} 
-    />
+    <MovieList movies={ratedMovies} genres={genres} guestSessionId={guestSessionId} onRatingDeleted={onRatingDeleted} />
   );
 
   return (
     <div>
-      {ratedMovies.length > 0 ? (
-        <>{renderContent()}</>
-      ) : (
-        <p>Вы еще не оценили ни одного фильма.</p>
-      )}
+      {ratedMovies.length > 0 
+      ? <>{renderContent()}</> 
+      : <p>Вы еще не оценили ни одного фильма.</p>}
     </div>
-  );
+  )
 }
 
 export default MovieRate;

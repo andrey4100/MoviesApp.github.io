@@ -162,7 +162,6 @@ body {
 	pointer-events: none;
 }
 
-
 @media (max-width: 1010px) {
 	.container {
 		max-width: 720px;

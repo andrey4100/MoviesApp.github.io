@@ -15,7 +15,6 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
   useEffect(() => {
     setLocalRating(null);
   }, [movie]);
-
   const ratingToDisplay = localRating !== null ? localRating : movie.rating || 0;
 
   const handleRate = async (value) => {
@@ -59,8 +58,8 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
     return '#66E900';
   };
 
-  const formattedVoteAverage = ratingToDisplay != null ? ratingToDisplay.toFixed(1) : null;
-  const ratingColor = getRatingColor(ratingToDisplay);
+  const formattedVoteAverage = movie.vote_average != null ? movie.vote_average.toFixed(1) : null;
+  const ratingColor = getRatingColor(movie.vote_average)
 
   const truncateDescription = (description, titleLength, genreCount) => {
     if (!description) {
@@ -109,7 +108,12 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
         </div>
       )}
       <div className="movie__card-rating">
-        <Rate allowHalf count={10} onChange={handleRate} value={ratingToDisplay} style={{ fontSize: 16 }} />
+        <Rate className='movie__card-rate'
+          allowHalf 
+          count={10} 
+          onChange={handleRate} 
+          value={ratingToDisplay} 
+          />
       </div>
     </div>
   );

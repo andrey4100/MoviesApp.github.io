@@ -26,11 +26,26 @@ class MovieService {
   getAllMovies = async (value, page) => {
     const res = await this.getResource(
       `${this.apiBase}/search/movie?api_key=${this.apiKey}&language=en-US&page=${page}&query='${value}'`
+      // `${this.apiBase}/movie/popular?api_key=${this.apiKey}&language=en-US&page=${page}&query='${value}'`
     );
 
     const movies = res.results.map(this.transformMovie);
     const totalMovies = res.total_results;
     return { movies, totalMovies };
+  };
+
+
+    // Метод для получения популярных фильмов
+    getPopularMovies = async (page) => {
+    const res = await this.getResource(
+      `${this.apiBase}/movie/popular?api_key=${this.apiKey}&language=en-US&page=${page}`
+    );
+
+    const movies = res.results.map(this.transformMovie);
+    const totalMovies = res.total_results; 
+    const totalPages = res.total_pages; 
+
+    return { movies, totalMovies, totalPages };
   };
 
   // Метод для получения списка жанров
@@ -52,24 +67,48 @@ class MovieService {
   };
 
   // Метод для получения оцененных фильмов
-  getRatedMovies = async (guestSessionId, page = 1) => {
+  getRatedMovies = async (guestSessionId) => {
     try {
-      const res = await this.getResource(
-        `${this.apiBase}/guest_session/${guestSessionId}/rated/movies?api_key=${this.apiKey}&language=en-US&page=${page}`
-      );
-
-      const ratedMovies = res.results
-        ? res.results.map((movie) => ({
+      let allRatedMovies = [];
+      let page = 1;
+      let totalPages = 1;
+  
+      while (page <= totalPages) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await this.getResource(
+          `${this.apiBase}/guest_session/${guestSessionId}/rated/movies?api_key=${this.apiKey}&language=en-US&page=${page}`
+        );
+  
+        if (!res.results) {
+          // eslint-disable-next-line no-console
+          console.warn(`No results on page ${page}`);  // Keep the warning
+        }
+  
+        if (!res.ok) {
+           // If the API returns a non-200 status code, throw an error
+           throw new Error(`HTTP error! status: ${res.status}`);
+        }
+  
+        if (res.results) {
+          const ratedMovies = res.results.map((movie) => ({
             ...this.transformMovie(movie),
             rating: movie.rating,
-          }))
-        : [];
-      const totalratedMovies = res.total_results;
-      const currPage = res.page;
-
-      return { ratedMovies, totalratedMovies, currPage };
+          }));
+          allRatedMovies = allRatedMovies.concat(ratedMovies);
+        }
+  
+        totalPages = res.total_pages;
+        page += 1;
+      }
+  
+      const totalratedMovies = allRatedMovies.length;
+      const currPage = 1;
+  
+      return { ratedMovies: allRatedMovies, totalratedMovies, currPage };
     } catch (error) {
-      return { ratedMovies: [], totalratedMovies: 0, currPage: 1 };
+      // eslint-disable-next-line no-console
+      console.error("Ошибка при получении всех оцененных фильмов:", error);
+      throw error; // Re-throw the error to reject the promise
     }
   };
 
