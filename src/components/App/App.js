@@ -28,7 +28,6 @@ function App() {
   const [totalRatedMovies, setTotalRatedMovies] = useState(0); // Состояние для хранения общего количества оцененных фильмов
   const [hasEverRatedMovies, setHasEverRatedMovies] = useState(false);
 
-
   const movieService = new MovieService();
   const moviesPerPage = 20;
 
@@ -63,8 +62,6 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-
-  
   // Получение списка фильмов, объединение оцененных фильмов
   useEffect(() => {
     async function fetchMovies() {
@@ -74,19 +71,19 @@ function App() {
         let data;
 
         if (activeTab === '1') {
-          const value = searchValue.trim(); 
+          const value = searchValue.trim();
 
           if (!value) {
-            data = await movieService.getPopularMovies(currentPage); 
+            data = await movieService.getPopularMovies(currentPage);
           } else {
-            data = await movieService.getAllMovies(value, currentPage); 
+            data = await movieService.getAllMovies(value, currentPage);
           }
-  
+
           const moviesWithRatings = data.movies.map((movie) => {
             const ratedMovie = ratedMovies.find((rated) => rated.id === movie.id);
             return ratedMovie ? { ...movie, rating: ratedMovie.rating } : movie;
           });
-  
+
           setMovies(moviesWithRatings);
           setTotalResults(data.totalMovies);
         }
@@ -98,11 +95,10 @@ function App() {
         setLoading(false);
       }
     }
-  
-    fetchMovies();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ searchValue, currentPage ]);
 
+    fetchMovies();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchValue, currentPage]);
 
   //  Получение оцененных фильмов с сервера при переключении на второй таб
   useEffect(() => {
@@ -137,19 +133,17 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, guestSessionId]);
 
-
   // Функция обрабатывает изменения рейтинга
   const handleRatingDeleted = (movieId, newRating = null) => {
-    
-      if (typeof newRating === 'number') {
-        if (!hasEverRatedMovies) {
-          setHasEverRatedMovies(true);
-        }
-      } else {
-        if (ratedMovies.length <= 1) {
-          setHasEverRatedMovies(false); 
-        }
+    if (typeof newRating === 'number') {
+      if (!hasEverRatedMovies) {
+        setHasEverRatedMovies(true);
       }
+    } else {
+      if (ratedMovies.length <= 1) {
+        setHasEverRatedMovies(false);
+      }
+    }
 
     setRatedMovies((prevRatedMovies) => prevRatedMovies.filter((movie) => movie.id !== movieId));
 
@@ -193,7 +187,6 @@ function App() {
   const onRatedPageChange = (page) => {
     setRatedCurrentPage(page);
   };
-
 
   const getPaginatedRatedMovies = () => {
     const startIndex = (ratedCurrentPage - 1) * moviesPerPage;
@@ -240,11 +233,7 @@ function App() {
             <>
               {renderContent()}
               {!loading && !isErrorTab1 && movies.length > 0 && (
-                <MoviePagination 
-                  currentPage={currentPage} 
-                  totalResults={totalResults} 
-                  onPageChange={onPageChange} 
-                />
+                <MoviePagination currentPage={currentPage} totalResults={totalResults} onPageChange={onPageChange} />
               )}
             </>
           )}
@@ -262,7 +251,7 @@ function App() {
               <div className="loading-text">Loading...</div>
             </div>
           ) : (
-            () => {
+            (() => {
               if (hasEverRatedMovies === false) {
                 return (
                   <div className="no-rated-movies">
@@ -273,7 +262,12 @@ function App() {
               if (isErrorTab2) {
                 return (
                   <div className="movie__list-alert">
-                    <Alert message="Error" description="Oopse! Something went wrong. Wait, we'll fix it." type="error" showIcon />
+                    <Alert
+                      message="Error"
+                      description="Oopse! Something went wrong. Wait, we'll fix it."
+                      type="error"
+                      showIcon
+                    />
                   </div>
                 );
               }
@@ -299,12 +293,12 @@ function App() {
                   )}
                 </div>
               );
-            }
-          )()}
+            })()
+          )}
         </>
       ),
-    }
-  ]
+    },
+  ];
 
   return (
     <GenresContext.Provider value={genres}>

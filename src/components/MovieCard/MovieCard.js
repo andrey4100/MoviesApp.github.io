@@ -59,7 +59,7 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
   };
 
   const formattedVoteAverage = movie.vote_average != null ? movie.vote_average.toFixed(1) : null;
-  const ratingColor = getRatingColor(movie.vote_average)
+  const ratingColor = getRatingColor(movie.vote_average);
 
   const truncateDescription = (description, titleLength, genreCount) => {
     if (!description) {
@@ -108,12 +108,7 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
         </div>
       )}
       <div className="movie__card-rating">
-        <Rate className='movie__card-rate'
-          allowHalf 
-          count={10} 
-          onChange={handleRate} 
-          value={ratingToDisplay} 
-          />
+        <Rate className="movie__card-rate" allowHalf count={10} onChange={handleRate} value={ratingToDisplay} />
       </div>
     </div>
   );

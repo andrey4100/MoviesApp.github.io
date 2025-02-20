@@ -22,13 +22,7 @@ function MovieRate({ guestSessionId, ratedMovies, onRatingDeleted, onRatedPageCh
     <MovieList movies={ratedMovies} genres={genres} guestSessionId={guestSessionId} onRatingDeleted={onRatingDeleted} />
   );
 
-  return (
-    <div>
-      {ratedMovies.length > 0 
-      ? <>{renderContent()}</> 
-      : <p>Вы еще не оценили ни одного фильма.</p>}
-    </div>
-  )
+  return <div>{ratedMovies.length > 0 ? <>{renderContent()}</> : <p>Вы еще не оценили ни одного фильма.</p>}</div>;
 }
 
 export default MovieRate;
