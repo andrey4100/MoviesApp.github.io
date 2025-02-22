@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Import useState
+import React from 'react'; // Import useState
 import { Tag, Rate } from 'antd';
 
 import MovieService from '../../services/MovieService';
@@ -6,42 +6,25 @@ import MovieService from '../../services/MovieService';
 import './MovieCard.css';
 import placeholderImage from '../../resourses/img/Out_Of_Poster.jpg';
 
-function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
+function MovieCard({ movie, genres, guestSessionId, movieRatings, onRatingChange }) {
   const imageBaseUrl = 'https://image.tmdb.org/t/p/w185';
   const imageUrl = movie.img ? `${imageBaseUrl}${movie.img}` : placeholderImage;
+  const movieService = new MovieService();
 
-  const [localRating, setLocalRating] = useState(null);
-
-  useEffect(() => {
-    setLocalRating(null);
-  }, [movie]);
-  const ratingToDisplay = localRating !== null ? localRating : movie.rating || 0;
+  const rating = movieRatings[movie.id] || 0;
 
   const handleRate = async (value) => {
     try {
-      setLocalRating(value);
+      onRatingChange(movie.id, value);
 
-      const movieService = new MovieService();
-      if (value === 0 && (movie.rating !== 0 || localRating !== null)) {
-        // eslint-disable-next-line no-console
-        console.log(`Deleting rating for movie ID: ${movie.id}`);
+      if (value === 0) {
         await movieService.deleteRatedMovie(guestSessionId, movie.id);
-        if (onRatingDeleted) {
-          onRatingDeleted(movie.id, null);
-        }
-        setLocalRating(0);
       } else {
-        // eslint-disable-next-line no-console
-        console.log(`Posting rating for movie ID: ${movie.id}, value: ${value}`);
         await movieService.postRatedMovie(guestSessionId, movie.id, value);
-        if (onRatingDeleted) {
-          onRatingDeleted(movie.id, value);
-        }
       }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Ошибка при оценке фильма:', error);
-      setLocalRating(movie.rating || 0);
     }
   };
 
@@ -66,17 +49,12 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
       return 'No description available';
     }
 
-    let maxLength;
-    if (titleLength > 44 && genreCount > 3) {
-      maxLength = 40;
-    } else if (titleLength > 44) {
-      maxLength = 80;
-    } else if (titleLength > 22 && genreCount > 3) {
-      maxLength = 80;
+    let maxLength = 160; 
+
+    if (titleLength > 44) {
+      maxLength = genreCount > 3 ? 40 : 80;
     } else if (titleLength > 22 || genreCount > 3) {
       maxLength = 120;
-    } else {
-      maxLength = 160;
     }
 
     if (description.length <= maxLength) {
@@ -108,7 +86,7 @@ function MovieCard({ movie, genres, guestSessionId, onRatingDeleted }) {
         </div>
       )}
       <div className="movie__card-rating">
-        <Rate className="movie__card-rate" allowHalf count={10} onChange={handleRate} value={ratingToDisplay} />
+        <Rate className="movie__card-rate" allowHalf count={10} onChange={handleRate} value={rating} />
       </div>
     </div>
   );

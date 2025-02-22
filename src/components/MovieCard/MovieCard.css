@@ -93,8 +93,6 @@
   font-weight: bold;
 }
 
-
-
 .movie__card-rate {
   grid-row: 7;
   grid-column: 1 / span 2;
@@ -103,8 +101,7 @@
   padding: 5px;
 }
 
-
-@media (max-width: 520px) {
+@media (max-width: 531px) {
   .movie__card {
     grid-template-columns: 66px 2fr;
     grid-template-rows: auto auto auto 1fr auto;
